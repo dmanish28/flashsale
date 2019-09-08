@@ -31,7 +31,6 @@ public class RegistrationServiceImpl implements RegistrationService{
 	EntityManager entityManager;
 	
 	
-	
 	@Override
     @Transactional(readOnly = false)
     public RegistrationOutput newRegistration( Customer b,  FlashSale f) {

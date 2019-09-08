@@ -31,5 +31,4 @@ public class PurchaseOutput {
 	public void setProductId(Integer productId) {
 		this.productId = productId;
 	}
-
 }

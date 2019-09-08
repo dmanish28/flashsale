@@ -63,7 +63,7 @@ public class FlashSaleDemoApplicationTests {
 	}
 	
 	@Test
-	public void createFlashSale() {
+	public void createFlashSale() throws Exception {
 		Product product = new Product();
 		product.setDescription("fossil watch");
 		product.setId(1);
@@ -98,12 +98,6 @@ public class FlashSaleDemoApplicationTests {
 		product.setPrice(12300);
 	//	FlashSale flashSale = flashSaleService.endFlashSale(flashSale)
 	//	assertEquals(product, flashSale.getProduct());
-	}
-	
-	@Test
-	public void sendEmails() {
-		String s = emailService.getAllCustomerEmailIds();
-		System.out.print(true);
 	}
 
 }

@@ -14,9 +14,6 @@ import org.springframework.stereotype.Service;
 import com.turvo.flashSaleDemo.service.LockService;
 import com.turvo.flashSaleDemo.util.Constants;
 
-
-
-
 @Service
 public class LockServiceImpl implements LockService {
 
