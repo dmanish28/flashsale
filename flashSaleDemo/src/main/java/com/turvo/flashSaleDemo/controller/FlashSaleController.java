@@ -66,38 +66,5 @@ public class FlashSaleController {
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(purOut);
 	}
-	
-	@PostMapping("/{customerId}/{flashsaleId}/purchaseMany")
-	public ResponseEntity<PurchaseOutput> purchaseAllFlashSaleItem(
-			@PathVariable Integer customerId, @PathVariable Integer flashsaleId) {
-
-		List<Customer> listOfCustomers = customerService.getAllCustomers();
-		PurchaseOutput purOut =null;
-		for(Customer cust : listOfCustomers) {
-			 purOut = flashSaleService.purchase(flashsaleId,cust.getId());
-
-		}
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(purOut);
-	}
-	
-	@PostMapping("/start")
-	public ResponseEntity<Boolean> startFlashSale() {
-		Product p = new Product();
-		p.setDescription("abc");
-			p.setId(1);
-			p.setStockUnit(2000);
-			p.setName("fossil");
-			p.setPrice(12222);
-			FlashSale f = new FlashSale();
-			f.setId(6);
-			f.setProduct(p);
-			f.setRegistrationOpen(Boolean.FALSE);
-			f.setStatus(Boolean.TRUE);
-		boolean purOut = flashSaleService.startFlashSale(f);
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(purOut);
-	}
-
 
 }
