@@ -40,7 +40,6 @@ public class CustomerServiceImpl implements CustomerService{
 		}
 
 
-	 
 	    
 	    @Override
 	    public Customer createCustomer(String name) {
@@ -51,9 +50,9 @@ public class CustomerServiceImpl implements CustomerService{
 	    }
 	    
 	    @Override
-	    public List<Customer> getAllCustomersEmail() {
-	    	List<Customer> emails = customerRepository.findAll();	
-	    	return emails;
+	    public List<Customer> getAllCustomers() {
+	    	List<Customer> cutomers = customerRepository.findAll();	
+	    	return cutomers;
 	    }
 
 }

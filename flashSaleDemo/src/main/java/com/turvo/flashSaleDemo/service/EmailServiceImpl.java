@@ -34,13 +34,13 @@ public class EmailServiceImpl implements EmailService{
       
         mailMessage.setTo(getAllCustomerEmailIds());
         mailMessage.setSubject(subject);
-        String html = "Flash sale is on <a href='http://localhost:8080/demo/v1/flashsale/1/5/register'>register</a> before June 30";
+        message = "Flash sale is on <a href='http://localhost:8080/demo/v1/flashsale/1/5/register'>register</a> before June 30";
         mailMessage.setText(message,true);
         javaMailSender.send(mm);
     }
     
     public InternetAddress[] getAllCustomerEmailIds() throws AddressException {
-    	List<Customer> listOfCusts = customerService.getAllCustomersEmail();
+    	List<Customer> listOfCusts = customerService.getAllCustomers();
     	InternetAddress[] emailConcatenated  = new InternetAddress[listOfCusts.size()];
     	// InternetAddress [] i = {new InternetAddress("illuminatiwakes@gmail.com"),new InternetAddress("manishwin4@gmail.com")};
     	for(int i =0 ;i< listOfCusts.size();i++ )

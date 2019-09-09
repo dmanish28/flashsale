@@ -8,6 +8,6 @@ public interface CustomerService {
 		  
 	  Customer createCustomer(String name);
 	  
-	  List<Customer> getAllCustomersEmail() ;
+	  List<Customer> getAllCustomers() ;
 
 }

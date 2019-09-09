@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -19,7 +20,9 @@ public class RedisConfiguration {
 
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
-        return new JedisConnectionFactory();
+    	RedisStandaloneConfiguration redisStandaloneConfiguration = 
+    			new RedisStandaloneConfiguration(redisProperties.getHost(), redisProperties.getPort());
+        return new JedisConnectionFactory(redisStandaloneConfiguration);
     }
      
     @Bean
@@ -28,11 +31,4 @@ public class RedisConfiguration {
         template.setConnectionFactory(jedisConnectionFactory());
         return template;
     }
-
-//    @Bean
-//    RedisTemplate<String, Integer> redisTemplate() {
-//        RedisTemplate<String, Integer> redisTemplate = new RedisTemplate<>();
-//        redisTemplate.setConnectionFactory(jedisConnectionFactory());
-//        return redisTemplate;
-
 }

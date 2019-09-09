@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <class-diagram version="1.2.3" icons="true" automaticImage="JPEG" always-add-relationships="false" 
-  generalizations="true" realizations="true" associations="true" dependencies="false" nesting-relationships="true" 
+  generalizations="true" realizations="true" associations="true" dependencies="true" nesting-relationships="true" 
   router="FAN">  
   <class id="1" language="java" name="com.turvo.flashSaleDemo.model.Product" project="flashSaleDemo" 
     file="/flashSaleDemo/src/main/java/com/turvo/flashSaleDemo/model/Product.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="341" width="117" x="336" y="723"/>    
+    <position height="377" width="117" x="198" y="752"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
@@ -13,7 +13,7 @@
   </class>  
   <class id="2" language="java" name="com.turvo.flashSaleDemo.model.Order" project="flashSaleDemo" 
     file="/flashSaleDemo/src/main/java/com/turvo/flashSaleDemo/model/Order.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="359" width="140" x="336" y="15"/>    
+    <position height="395" width="140" x="198" y="-28"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
@@ -23,7 +23,7 @@
   <class id="3" language="java" name="com.turvo.flashSaleDemo.model.Registration" project="flashSaleDemo" 
     file="/flashSaleDemo/src/main/java/com/turvo/flashSaleDemo/model/Registration.java" binary="false" 
     corner="BOTTOM_RIGHT">    
-    <position height="251" width="182" x="516" y="15"/>    
+    <position height="287" width="182" x="378" y="-28"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
@@ -33,7 +33,7 @@
   <class id="4" language="java" name="com.turvo.flashSaleDemo.model.FlashSale" project="flashSaleDemo" 
     file="/flashSaleDemo/src/main/java/com/turvo/flashSaleDemo/model/FlashSale.java" binary="false" 
     corner="BOTTOM_RIGHT">    
-    <position height="269" width="144" x="532" y="414"/>    
+    <position height="305" width="144" x="394" y="407"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
@@ -42,7 +42,7 @@
   </class>  
   <class id="5" language="java" name="com.turvo.flashSaleDemo.model.Customer" project="flashSaleDemo" 
     file="/flashSaleDemo/src/main/java/com/turvo/flashSaleDemo/model/Customer.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="233" width="116" x="376" y="414"/>    
+    <position height="269" width="116" x="238" y="407"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
@@ -50,19 +50,19 @@
     </display>  
   </class>  
   <association id="6">    
-    <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="7" name="flashSale"/>      
+    <end type="SOURCE" refId="2" navigable="false">      
+      <attribute id="7" name="customer"/>      
       <multiplicity id="8" minimum="0" maximum="1"/>    
     </end>    
-    <end type="TARGET" refId="4" navigable="true"/>    
+    <end type="TARGET" refId="5" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="9">    
-    <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="10" name="customer"/>      
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="10" name="flashSale"/>      
       <multiplicity id="11" minimum="0" maximum="1"/>    
     </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
+    <end type="TARGET" refId="4" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="12">    
@@ -74,7 +74,7 @@
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="15">    
-    <bendpoint x="345" y="414"/>    
+    <bendpoint x="207" y="407"/>    
     <end type="SOURCE" refId="2" navigable="false">      
       <attribute id="16" name="product"/>      
       <multiplicity id="17" minimum="0" maximum="1"/>    

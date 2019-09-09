@@ -90,7 +90,7 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 		flashSale.setRegistrationOpen(Boolean.TRUE);
 		FlashSale returnedFS = flashSaleRepository.save(flashSale);
 		
-		emailService.sendMail("", "", "");
+		//emailService.sendMail("", "", "");
 		
 		return returnedFS;
 	}
@@ -232,13 +232,13 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 	private Boolean persistPurchase(Integer newStockUnit, Integer flashSaleId, Integer customerId, Integer productId) {
 		
 		try{
-			Product product = productRepository.getOne(productId);
-		product.setStockUnit(newStockUnit);
-		productRepository.saveAndFlush(product);
+			Optional<Product> product = productRepository.findById(productId);
+		product.get().setStockUnit(newStockUnit);
+		productRepository.saveAndFlush(product.get());
 
 		Order order = new Order();
-		order.setCustomer(customerRepository.getOne(customerId));
-		order.setProduct(productRepository.getOne(productId));
+		order.setCustomer(customerRepository.findById(customerId).get());
+		order.setProduct(productRepository.findById(productId).get());
 		order.setCreatedAt(new Date());
 		order.setOrderStatus(OrderStatus.APPROVED);
 		orderRepository.saveAndFlush(order);
