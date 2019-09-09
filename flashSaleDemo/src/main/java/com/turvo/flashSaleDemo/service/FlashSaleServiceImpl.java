@@ -12,11 +12,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.mail.MessagingException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
+import org.springframework.mail.MailException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,7 +85,7 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 	}
 
 	@Override
-	public FlashSale createFlashSale(Product product) throws Exception {
+	public FlashSale createFlashSale(Product product) throws DataAccessException,MailException,MessagingException {
 		// TODO Auto-generated method stub
 		FlashSale flashSale = new FlashSale();
 		flashSale.setStatus(Boolean.FALSE);
@@ -98,22 +101,28 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 	}
 
 	@Override
-	public Boolean startFlashSale(FlashSale flashSale) {
+	public Boolean startFlashSale(FlashSale flashSale){
 		// TODO Auto-generated method stub
 		cacheFlashSaleDetails(flashSale);
 		flashSale.setRegistrationOpen(Boolean.FALSE);
 		flashSale.setStatus(Boolean.TRUE);
-		flashSaleRepository.saveAndFlush(flashSale);
-		return true;
+		FlashSale returnedFlashSale = flashSaleRepository.saveAndFlush(flashSale);
+		if(returnedFlashSale!=null && returnedFlashSale.getStatus() && !returnedFlashSale.getRegistrationOpen())
+			return true;
+		else
+			return false;
 	}
 
 	@Override
 	public Boolean endFlashSale(FlashSale flashSale) {
 		// TODO Auto-generated method stub
 		flashSale.setStatus(Boolean.TRUE);
-		flashSaleRepository.saveAndFlush(flashSale);
+		FlashSale returnedFlashSale = flashSaleRepository.saveAndFlush(flashSale);
 
-		return true;
+		if(returnedFlashSale!=null && returnedFlashSale.getStatus())
+			return true;
+		else
+			return false;
 	}
 
 	@Override
@@ -125,9 +134,9 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 		regOut.setStatus(Boolean.FALSE);
 
 		if (flashSale == null || !flashSale.get().getRegistrationOpen() || flashSale.get().getStatus() == Boolean.TRUE) {
-			regOut.setMessage("Invalid flashsale");//to externalize
+			regOut.setMessage("Invalid registration request");//to externalize
 		} else if (customer == null) {
-			regOut.setMessage("Invalid customer");//to externalize
+			regOut.setMessage("Invalid customer request");//to externalize
 		} else {
 			Registration registration = registrationService.getRegistrationByFlashIdAndCustomerId(flashSale.get().getId(),customer.get().getId());
 			if (registration != null) {
@@ -142,7 +151,7 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 
 
 	@Override
-	public PurchaseOutput purchase(final Integer flashsaleId, final Integer customerId){
+	public PurchaseOutput purchase(final Integer flashsaleId, final Integer customerId) throws InterruptedException, ExecutionException, TimeoutException{
 
 		Integer productId =  (Integer)cacheService.getFromMemory(Constants.FLASHSALE_CACHE_PREFIX,flashsaleId.toString());
 		final String productKey = Constants.PRODUCT_CACHE_PREFIX + "_" + flashsaleId + "_" + productId;
@@ -158,7 +167,6 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 		Future<PurchaseOutput> future = executorService.submit(new Callable<PurchaseOutput>() {
 			@Override
 			public PurchaseOutput call() throws Exception {
-
 
 				while (System.currentTimeMillis() < end) {
 					final String readLock = lockService.acquireLockWithTimeout(Constants.ELIGIBILITY_LOCKNAME,
@@ -212,20 +220,10 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 					});
 				}
 				return purchaseOutput;
-
 			}
 		});
 
-		try {
-			return future.get(Constants.BUY_TIMEOUT.longValue(), TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			e.getMessage();
-		} catch (ExecutionException e) {
-			e.getMessage();
-		} catch (TimeoutException e) {
-			e.getMessage();
-		}
-		return purchaseOutput;
+		return future.get(Constants.BUY_TIMEOUT.longValue(), TimeUnit.SECONDS);
 	}
 
 
@@ -233,8 +231,7 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 	@Transactional(readOnly = false)
 	private Boolean persistPurchase(Integer newStockUnit, Integer flashSaleId, Integer customerId, Integer productId) {
 		
-		try{
-			Optional<Product> product = productRepository.findById(productId);
+		Optional<Product> product = productRepository.findById(productId);
 		product.get().setStockUnit(newStockUnit);
 		productRepository.saveAndFlush(product.get());
 
@@ -249,9 +246,6 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 		registration.setRegistrationStatus(RegistrationStatus.PURCHASED);
 		Registration savedRegistration = registrationRepository.saveAndFlush(registration);
 		if(savedRegistration != null) {
-			return false;
-		}
-		}catch(Exception e){
 			return false;
 		}
 		return true;

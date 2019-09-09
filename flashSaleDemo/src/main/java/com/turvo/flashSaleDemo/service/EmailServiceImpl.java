@@ -2,11 +2,13 @@ package com.turvo.flashSaleDemo.service;
 
 import java.util.List;
 
+import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -27,7 +29,7 @@ public class EmailServiceImpl implements EmailService{
     }
 
  
-    public void sendMail(InternetAddress[] toEmail, String subject, String message) throws Exception {
+    public void sendMail(InternetAddress[] toEmail, String subject, String message) throws MailException,MessagingException {
      
         MimeMessage mm = javaMailSender.createMimeMessage();
         MimeMessageHelper mailMessage = new MimeMessageHelper(mm);
@@ -42,11 +44,9 @@ public class EmailServiceImpl implements EmailService{
     public InternetAddress[] getAllCustomerEmailIds() throws AddressException {
     	List<Customer> listOfCusts = customerService.getAllCustomers();
     	InternetAddress[] emailConcatenated  = new InternetAddress[listOfCusts.size()];
-    	// InternetAddress [] i = {new InternetAddress("illuminatiwakes@gmail.com"),new InternetAddress("manishwin4@gmail.com")};
     	for(int i =0 ;i< listOfCusts.size();i++ )
     	{    		
     		emailConcatenated[i] = new InternetAddress(listOfCusts.get(i).getEmailId());
-    		
     	}
     	return emailConcatenated;
     }
