@@ -27,15 +27,15 @@ public class EmailServiceImpl implements EmailService{
     }
 
  
-    public void sendMail(String toEmail, String subject, String message) throws Exception {
+    public void sendMail(InternetAddress[] toEmail, String subject, String message) throws Exception {
      
         MimeMessage mm = javaMailSender.createMimeMessage();
         MimeMessageHelper mailMessage = new MimeMessageHelper(mm);
       
-        mailMessage.setTo(getAllCustomerEmailIds());
+        mailMessage.setTo(toEmail);
         mailMessage.setSubject(subject);
-        message = "Flash sale is on <a href='http://localhost:8080/demo/v1/flashsale/1/5/register'>register</a> before June 30";
         mailMessage.setText(message,true);
+       
         javaMailSender.send(mm);
     }
     

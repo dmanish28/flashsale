@@ -5,6 +5,6 @@ import javax.mail.internet.InternetAddress;
 
 public interface EmailService {
 	
-	void sendMail(String toEmail, String subject, String message) throws Exception; 
+	void sendMail(InternetAddress[] toEmail, String subject, String message) throws Exception; 
 	InternetAddress[] getAllCustomerEmailIds()  throws AddressException ;
 }

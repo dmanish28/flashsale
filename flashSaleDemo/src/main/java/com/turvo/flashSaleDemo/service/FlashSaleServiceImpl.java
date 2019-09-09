@@ -89,9 +89,11 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 		flashSale.setProduct(product);
 		flashSale.setRegistrationOpen(Boolean.TRUE);
 		FlashSale returnedFS = flashSaleRepository.save(flashSale);
-		
-		//emailService.sendMail("", "", "");
-		
+
+		String subject = "Flash Sale!!";
+		String message = "Flash sale is on!! Register before June 30";
+		emailService.sendMail(emailService.getAllCustomerEmailIds(),subject ,message);
+
 		return returnedFS;
 	}
 
