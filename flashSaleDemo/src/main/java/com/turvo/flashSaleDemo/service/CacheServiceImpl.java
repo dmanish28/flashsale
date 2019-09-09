@@ -1,4 +1,4 @@
-package com.turvo.flashSaleDemo.serviceImpl;
+package com.turvo.flashSaleDemo.service;
 
 import java.util.Map;
 
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.turvo.flashSaleDemo.service.CacheService;
 import com.turvo.flashSaleDemo.util.Constants;
 
 @Service

@@ -83,7 +83,6 @@ public class FlashSaleDemoApplicationTests {
 		product.setName("watch");
 		product.setPrice(12300);
 	//	FlashSale flashSale = flashSaleService.register(flashsaleId, customerId);
-	//(product, flashSale.getProduct());
 	}
 	
 	

@@ -15,7 +15,5 @@ public interface FlashSaleService {
 
 	RegistrationOutput register(final Integer flashsaleId, final Integer customerId);
 
-	Boolean isEligible(final Integer flashsaleId, final Integer customerId);
-
 	PurchaseOutput purchase(final Integer flashsaleId,final Integer customerId);
 }

@@ -1,4 +1,4 @@
-package com.turvo.flashSaleDemo.serviceImpl;
+package com.turvo.flashSaleDemo.service;
 
 import java.util.List;
 
@@ -12,8 +12,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import com.turvo.flashSaleDemo.model.Customer;
-import com.turvo.flashSaleDemo.service.CustomerService;
-import com.turvo.flashSaleDemo.service.EmailService;
 
 @Service
 public class EmailServiceImpl implements EmailService{
@@ -38,7 +36,6 @@ public class EmailServiceImpl implements EmailService{
         mailMessage.setSubject(subject);
         String html = "Flash sale is on <a href='http://localhost:8080/demo/v1/flashsale/1/5/register'>register</a> before June 30";
         mailMessage.setText(message,true);
-       // mailMessage.setFrom("illuminatiwakes@gmail.com");
         javaMailSender.send(mm);
     }
     

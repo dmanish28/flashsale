@@ -1,4 +1,4 @@
-package com.turvo.flashSaleDemo.serviceImpl;
+package com.turvo.flashSaleDemo.service;
 
 import java.util.List;
 import java.util.UUID;
@@ -11,7 +11,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 
-import com.turvo.flashSaleDemo.service.LockService;
 import com.turvo.flashSaleDemo.util.Constants;
 
 @Service

@@ -1,4 +1,4 @@
-package com.turvo.flashSaleDemo.serviceImpl;
+package com.turvo.flashSaleDemo.service;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -35,12 +35,6 @@ import com.turvo.flashSaleDemo.repository.FlashSaleRepository;
 import com.turvo.flashSaleDemo.repository.OrderRepository;
 import com.turvo.flashSaleDemo.repository.ProductRepository;
 import com.turvo.flashSaleDemo.repository.RegistrationRepository;
-import com.turvo.flashSaleDemo.service.CacheService;
-import com.turvo.flashSaleDemo.service.CustomerService;
-import com.turvo.flashSaleDemo.service.EmailService;
-import com.turvo.flashSaleDemo.service.FlashSaleService;
-import com.turvo.flashSaleDemo.service.LockService;
-import com.turvo.flashSaleDemo.service.RegistrationService;
 import com.turvo.flashSaleDemo.util.Constants;
 
 
@@ -142,13 +136,6 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 			}
 		}
 		return regOut;
-	}
-
-	@Override
-	public Boolean isEligible(Integer flashsaleId, Integer customerId) {
-		// TODO Auto-generated method stub
-		Integer productId =  (Integer)cacheService.getFromMemory(Constants.FLASHSALE_CACHE_PREFIX,flashsaleId.toString());
-		return customerService.checkIfEligible(flashsaleId,productId, customerId);
 	}
 
 

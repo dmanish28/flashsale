@@ -1,4 +1,4 @@
-package com.turvo.flashSaleDemo.serviceImpl;
+package com.turvo.flashSaleDemo.service;
 
 import java.util.List;
 
@@ -18,7 +18,6 @@ import com.turvo.flashSaleDemo.model.FlashSale;
 import com.turvo.flashSaleDemo.model.Registration;
 import com.turvo.flashSaleDemo.objects.RegistrationOutput;
 import com.turvo.flashSaleDemo.repository.RegistrationRepository;
-import com.turvo.flashSaleDemo.service.RegistrationService;
 
 
 @Service
