@@ -32,7 +32,7 @@ API's:
 
 
 
-ClassDiagram:
+ClassDiagram:com.turvo.flashSaleDemo.model.FSClassDiagram.jpg
 
-ER Diagram:
+ER Diagram: com.turvo.flashSaleDemo.model.ERDiagram.pdf
 
