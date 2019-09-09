@@ -27,12 +27,14 @@ spring.mail.password=
 spring.mail.properties.mail.smtp.auth = true
 spring.mail.properties.mail.smtp.starttls.enable = true
 
-API's:
+API's: com.turvo.flashSaleDemo.controller.FlashController 
+Two API's are exposed :
+1. To register  : http://localhost:8080/demo/v1/flashsale/{cutomerID}/{flashId}/register
+2. To purchase : http://localhost:8080/demo/v1/flashsale/{cutomerID}/{flashId}/purchase
 
 
 
-
-ClassDiagram:com.turvo.flashSaleDemo.model.FSClassDiagram.jpg
+ClassDiagram: com.turvo.flashSaleDemo.model.FSClassDiagram.jpg
 
 ER Diagram: com.turvo.flashSaleDemo.model.ERDiagram.pdf
 
