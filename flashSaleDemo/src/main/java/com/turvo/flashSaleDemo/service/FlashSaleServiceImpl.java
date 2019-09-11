@@ -81,7 +81,7 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 	private final ExecutorService executorService;
 
 	public FlashSaleServiceImpl() {
-		executorService = Executors.newFixedThreadPool(1);
+		executorService = Executors.newFixedThreadPool(5);
 	}
 
 	@Override
@@ -160,9 +160,6 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 		final Long end = System.currentTimeMillis() + Constants.BUY_TIMEOUT.longValue() * 1000  * 1000;
 
 		final PurchaseOutput purchaseOutput = new PurchaseOutput(Boolean.FALSE, customerId, productId);
-		purchaseOutput.setCustomerId(customerId);
-		purchaseOutput.setProductId(productId);
-		purchaseOutput.setStatus(Boolean.FALSE);
 
 		Future<PurchaseOutput> future = executorService.submit(new Callable<PurchaseOutput>() {
 			@Override
@@ -190,23 +187,24 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 						public PurchaseOutput execute(RedisOperations operations) throws DataAccessException {
 							try {
 								operations.watch(watchKeys);
-
 								final Integer remainingUnits = (Integer) operations.opsForValue().get(productKey);
 								final Boolean customerStatus = (Boolean) operations.opsForValue().get(customerKey);
-
+								
 								if (customerStatus != null && customerStatus && remainingUnits != null && remainingUnits > 0) {
+									// System.out.println("unit: " + remainingUnits + ", customer: " + customerId);
 
-									operations.multi();
-									final Integer changedUnit = remainingUnits - 1;
-									operations.opsForValue().set(productKey, changedUnit);
-									operations.delete(customerKey);
-									operations.exec();
-									operations.unwatch();
-																									
-									// purchased
-									purchaseOutput.setStatus(Boolean.TRUE);
-									persistPurchase(changedUnit, flashsaleId, customerId, productId);
-									
+									 operations.multi();
+									 
+									 final Integer changedUnit =  remainingUnits - 1;
+									 operations.opsForValue().set(productKey, changedUnit);
+									 operations.delete(customerKey);
+									 operations.exec();
+									 operations.unwatch();
+									// System.out.println("Purchase successful, customer: " + customerId);								
+									 // purchased
+									 purchaseOutput.setStatus(Boolean.TRUE);
+									 persistPurchase(changedUnit, flashsaleId, customerId, productId);
+								
 									return purchaseOutput;
 								} else {
 									//cant buy
@@ -227,11 +225,14 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 		try {
             return future.get(Constants.BUY_TIMEOUT.longValue(), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-          
+          purchaseOutput.setStatus(Boolean.FALSE);
+          e.printStackTrace();
         } catch (ExecutionException e) {
-           
+        	purchaseOutput.setStatus(Boolean.FALSE);
+            e.printStackTrace();
         } catch (TimeoutException e) {
-            
+        	purchaseOutput.setStatus(Boolean.FALSE);
+            e.printStackTrace();
         }
 		return purchaseOutput;
 	}
@@ -239,7 +240,7 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 
 	@Async
 	@Transactional(readOnly = false)
-	private Boolean persistPurchase(Integer newStockUnit, Integer flashSaleId, Integer customerId, Integer productId) {
+	private void persistPurchase(Integer newStockUnit, Integer flashSaleId, Integer customerId, Integer productId) {
 		
 		Optional<Product> product = productRepository.findById(productId);
 		product.get().setStockUnit(newStockUnit);
@@ -255,10 +256,6 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 		Registration registration = registrationService.getRegistrationByFlashIdAndCustomerId(flashSaleId, customerId);
 		registration.setRegistrationStatus(RegistrationStatus.PURCHASED);
 		Registration savedRegistration = registrationRepository.saveAndFlush(registration);
-		if(savedRegistration != null) {
-			return false;
-		}
-		return true;
 		//orders can also be scheduled here
 	}
 	

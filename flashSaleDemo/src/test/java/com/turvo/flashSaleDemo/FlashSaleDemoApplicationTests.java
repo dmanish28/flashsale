@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
@@ -27,11 +28,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.turvo.flashSaleDemo.model.Customer;
 import com.turvo.flashSaleDemo.model.FlashSale;
 import com.turvo.flashSaleDemo.model.Product;
@@ -84,7 +80,7 @@ public class FlashSaleDemoApplicationTests {
 	private FlashSaleRepository flashSaleRepository;
 
 
-	private static final Integer NO_OF_CUSTOMERS= 14;
+	private static final Integer NO_OF_CUSTOMERS= 20;
 
 	private static final String RECIPIENT =  "abc@abc.com";
 
@@ -92,7 +88,7 @@ public class FlashSaleDemoApplicationTests {
 
 	private static final String SUBJECT =  "FLASH SALE";
 
-	ListeningExecutorService EXECUTOR_SERVICE = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(120));
+	ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(5);
 
 	private FlashSale flashSale;
 	private Product product;
@@ -102,7 +98,7 @@ public class FlashSaleDemoApplicationTests {
 		//for this project only , populating data for product
 		product = new Product();
 		product.setDescription("fossil watch");
-		product.setStockUnit(10);
+		product.setStockUnit(2000);
 		product.setName("watch");
 		product.setPrice(12300);
 		Product p = productRepository.saveAndFlush(product);
@@ -149,7 +145,7 @@ public class FlashSaleDemoApplicationTests {
 			emailService.sendMail(InternetAddress.parse(RECIPIENT), SUBJECT,MAIL_MESSAGE);
 			Assert.assertTrue("Mail sent!!", true);
 		}catch(Exception me) {
-			Assert.assertTrue("Failed to send mail", false);
+			Assert.assertTrue("Failed to send mail. "+me.getMessage(), false);
 		}
 	}
 
@@ -186,11 +182,13 @@ public class FlashSaleDemoApplicationTests {
 			Assert.assertTrue("Registered!!", regOutput.getStatus());
 		}
 
+		System.out.println("All registrations done!!");
 		Assert.assertTrue("flashsale starts", flashSaleService.startFlashSale(flashSale));
-		List<ListenableFuture<PurchaseOutput>> futures = Lists.newArrayList();
+		System.out.println("Flash Sale starts!!");
+		List<Future<PurchaseOutput>> listOfPurchases = Lists.newArrayList();
 
 		for(Customer cust : listOfCustomers) {
-			ListenableFuture<PurchaseOutput> future = EXECUTOR_SERVICE.submit(new Callable<PurchaseOutput>() {
+			Future<PurchaseOutput> future = EXECUTOR_SERVICE.submit(new Callable<PurchaseOutput>() {
 
 				@Override
 				public PurchaseOutput call() throws Exception {
@@ -198,33 +196,22 @@ public class FlashSaleDemoApplicationTests {
 					return flashSaleService.purchase(flashSale.getId(), cust.getId());
 				}
 			});
-
-
-			Futures.addCallback(future, new FutureCallback<PurchaseOutput>() {
-				@Override
-				public void onSuccess( PurchaseOutput result) {
-				}
-
-				@Override
-				public void onFailure(Throwable t) {
-					//logger.info("Issue", t);
-				}
-			});
-			futures.add(future);
+			
+			listOfPurchases.add(future);
 		}
-		Future<List<PurchaseOutput>> listOfPurchases = Futures.successfulAsList(futures);
+		//Future<List<PurchaseOutput>> listOfPurchases = Futures.successfulAsList(futures);
 
 		Set<Integer> successfulPurchase= new HashSet<>();
 		Set<Integer> failedPurchase = new HashSet<>();
 
 		int count = 0;
 
-		for (PurchaseOutput puOutput : listOfPurchases.get()) {
+		for (Future<PurchaseOutput> puOutput : listOfPurchases) {
 
-			if (puOutput != null && puOutput.getStatus()) {
-				successfulPurchase.add(puOutput.getCustomerId());
+			if (puOutput != null && puOutput.get().getStatus()) {
+				successfulPurchase.add(puOutput.get().getCustomerId());
 			} else {
-				count= count+1;
+				failedPurchase.add(puOutput.get().getCustomerId());
 			}
 		}
 
@@ -236,10 +223,7 @@ public class FlashSaleDemoApplicationTests {
 		else {
 			Assert.assertEquals(flashSale.getProduct().getStockUnit(),(Integer)successfulPurchase.size());
 			Assert.assertEquals(new Integer(0),p.get().getStockUnit());
-		}
-
-		
-
+		}	
 	}
 
 	@Test
