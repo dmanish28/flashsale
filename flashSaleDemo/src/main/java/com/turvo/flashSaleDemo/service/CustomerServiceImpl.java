@@ -30,14 +30,9 @@ public class CustomerServiceImpl implements CustomerService{
 		executorService = Executors.newFixedThreadPool(5);
 	}
 
-
-
 	@Override
-	public Customer createCustomer(String name) {
-		Customer c = new Customer();
-		c.setName(name);
-		c.setEmailId(name+"@abc.com");
-		return customerRepository.saveAndFlush(c);
+	public Customer createCustomer(Customer customer) {
+		return customerRepository.saveAndFlush(customer);
 	}
 
 	@Override

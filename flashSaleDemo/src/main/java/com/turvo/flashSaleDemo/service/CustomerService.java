@@ -6,7 +6,7 @@ import com.turvo.flashSaleDemo.model.Customer;
 
 public interface CustomerService {
 		  
-	  Customer createCustomer(String name);
+	  Customer createCustomer(Customer customer);
 	  
 	  List<Customer> getAllCustomers() ;
 

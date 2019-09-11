@@ -81,7 +81,7 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 	private final ExecutorService executorService;
 
 	public FlashSaleServiceImpl() {
-		executorService = Executors.newFixedThreadPool(5);
+		executorService = Executors.newFixedThreadPool(1);
 	}
 
 	@Override
@@ -95,7 +95,7 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 
 		String subject = "Flash Sale!!";
 		String message = "Flash sale is on!! Register before June 30";
-		emailService.sendMail(emailService.getAllCustomerEmailIds(),subject ,message);
+		//emailService.sendMail(emailService.getAllCustomerEmailIds(),subject ,message);
 
 		return returnedFS;
 	}
@@ -157,9 +157,9 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 		final String productKey = Constants.PRODUCT_CACHE_PREFIX + "_" + flashsaleId + "_" + productId;
 		final String customerKey = Constants.CUSTOMER_CACHE_PREFIX + "_" + flashsaleId + "_" + customerId;
 		final List<String> watchKeys = Arrays.asList(productKey, customerKey);
-		final Long end = System.currentTimeMillis() + Constants.BUY_TIMEOUT.longValue() * 1000 * 1000 * 1000;
+		final Long end = System.currentTimeMillis() + Constants.BUY_TIMEOUT.longValue() * 1000  * 1000;
 
-		final PurchaseOutput purchaseOutput = new PurchaseOutput();
+		final PurchaseOutput purchaseOutput = new PurchaseOutput(Boolean.FALSE, customerId, productId);
 		purchaseOutput.setCustomerId(customerId);
 		purchaseOutput.setProductId(productId);
 		purchaseOutput.setStatus(Boolean.FALSE);
@@ -202,10 +202,11 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 									operations.delete(customerKey);
 									operations.exec();
 									operations.unwatch();
+																									
 									// purchased
 									purchaseOutput.setStatus(Boolean.TRUE);
-
 									persistPurchase(changedUnit, flashsaleId, customerId, productId);
+									
 									return purchaseOutput;
 								} else {
 									//cant buy
@@ -223,7 +224,16 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 			}
 		});
 
-		return future.get(Constants.BUY_TIMEOUT.longValue(), TimeUnit.SECONDS);
+		try {
+            return future.get(Constants.BUY_TIMEOUT.longValue(), TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+          
+        } catch (ExecutionException e) {
+           
+        } catch (TimeoutException e) {
+            
+        }
+		return purchaseOutput;
 	}
 
 

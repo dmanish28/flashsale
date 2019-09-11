@@ -7,6 +7,14 @@ public class PurchaseOutput {
     private Integer customerId;
 
     private Integer productId;
+    
+    
+
+	public PurchaseOutput(Boolean status, Integer customerId, Integer productId) {
+		this.status = status;
+		this.customerId = customerId;
+		this.productId = productId;
+	}
 
 	public Boolean getStatus() {
 		return status;

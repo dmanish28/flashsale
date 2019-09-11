@@ -31,9 +31,9 @@ public class LockServiceImpl implements LockService {
 				redisTemplate.expire(lockKey, lockTimeout, TimeUnit.MILLISECONDS);
 				return identifier;
 			}
-			if (redisTemplate.getExpire(lockKey) == -1) {
-				redisTemplate.expire(lockKey, lockTimeout, TimeUnit.MILLISECONDS);
-			}
+//			if (redisTemplate.getExpire(lockKey) == -1) {
+//				redisTemplate.expire(lockKey, lockTimeout, TimeUnit.MILLISECONDS);
+//			}
 			try {
 				Thread.sleep(Constants.LOCK_ACQUIRE_LOOP_SLEEP);
 			} catch (InterruptedException ie) {

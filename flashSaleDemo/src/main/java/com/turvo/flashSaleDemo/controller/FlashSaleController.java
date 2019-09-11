@@ -1,7 +1,6 @@
 package com.turvo.flashSaleDemo.controller;
 
 
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -13,9 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.turvo.flashSaleDemo.model.Customer;
-import com.turvo.flashSaleDemo.model.FlashSale;
-import com.turvo.flashSaleDemo.model.Product;
 import com.turvo.flashSaleDemo.objects.PurchaseOutput;
 import com.turvo.flashSaleDemo.objects.RegistrationOutput;
 import com.turvo.flashSaleDemo.service.CustomerService;
