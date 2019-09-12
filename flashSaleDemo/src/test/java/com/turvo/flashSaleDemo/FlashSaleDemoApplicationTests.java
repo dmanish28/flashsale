@@ -79,7 +79,7 @@ public class FlashSaleDemoApplicationTests {
 	private FlashSaleRepository flashSaleRepository;
 
 
-	private static final Integer NO_OF_CUSTOMERS= 5000;
+	private static final Integer NO_OF_CUSTOMERS= 15;
 
 	private static final String RECIPIENT =  "abc@abc.com";
 
@@ -97,7 +97,7 @@ public class FlashSaleDemoApplicationTests {
 		//for this project only , populating data for product
 		product = new Product();
 		product.setDescription("fossil watch");
-		product.setStockUnit(20000);
+		product.setStockUnit(2000);
 		product.setName("watch");
 		product.setPrice(12300);
 		Product p = productRepository.saveAndFlush(product);
