@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.google.common.collect.Lists;
 import com.turvo.flashSaleDemo.model.Customer;
 import com.turvo.flashSaleDemo.model.FlashSale;
 import com.turvo.flashSaleDemo.model.Product;
@@ -80,7 +79,7 @@ public class FlashSaleDemoApplicationTests {
 	private FlashSaleRepository flashSaleRepository;
 
 
-	private static final Integer NO_OF_CUSTOMERS= 20;
+	private static final Integer NO_OF_CUSTOMERS= 5000;
 
 	private static final String RECIPIENT =  "abc@abc.com";
 
@@ -98,7 +97,7 @@ public class FlashSaleDemoApplicationTests {
 		//for this project only , populating data for product
 		product = new Product();
 		product.setDescription("fossil watch");
-		product.setStockUnit(2000);
+		product.setStockUnit(20000);
 		product.setName("watch");
 		product.setPrice(12300);
 		Product p = productRepository.saveAndFlush(product);
@@ -185,7 +184,7 @@ public class FlashSaleDemoApplicationTests {
 		System.out.println("All registrations done!!");
 		Assert.assertTrue("flashsale starts", flashSaleService.startFlashSale(flashSale));
 		System.out.println("Flash Sale starts!!");
-		List<Future<PurchaseOutput>> listOfPurchases = Lists.newArrayList();
+		List<Future<PurchaseOutput>> listOfPurchases = new ArrayList<>();
 
 		for(Customer cust : listOfCustomers) {
 			Future<PurchaseOutput> future = EXECUTOR_SERVICE.submit(new Callable<PurchaseOutput>() {
