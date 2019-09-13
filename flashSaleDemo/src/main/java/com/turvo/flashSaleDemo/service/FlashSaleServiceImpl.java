@@ -138,7 +138,7 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 		} else if (customer == null) {
 			regOut.setMessage("Invalid customer request");//to externalize
 		} else {
-			Registration registration = registrationService.getRegistrationByFlashIdAndCustomerId(flashSale.get().getId(),customer.get().getId());
+			Registration registration = registrationRepository.findByFlashSaleIdAndCustomerId(flashSale.get().getId(),customer.get().getId());
 			if (registration != null) {
 				regOut.setMessage("customer already registered");
 				regOut.setRegistrationId(registration.getId());
@@ -253,15 +253,15 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 		order.setOrderStatus(OrderStatus.APPROVED);
 		orderRepository.saveAndFlush(order);
 
-		Registration registration = registrationService.getRegistrationByFlashIdAndCustomerId(flashSaleId, customerId);
+		Registration registration = registrationRepository.findByFlashSaleIdAndCustomerId(flashSaleId, customerId);
 		registration.setRegistrationStatus(RegistrationStatus.PURCHASED);
-		Registration savedRegistration = registrationRepository.saveAndFlush(registration);
+		registrationRepository.saveAndFlush(registration);
 		//orders can also be scheduled here
 	}
 	
 	
 	private void cacheFlashSaleDetails(FlashSale f) {
-        List<Registration> registrationsForThisFlashsale = registrationService.getRegistrationListByFlashSaleId(f.getId());
+        List<Registration> registrationsForThisFlashsale = registrationRepository.findByFlashSaleIdAndRegistrationStatus(f.getId(),RegistrationStatus.REGISTERED);
         Product p = f.getProduct();
 
         // cache product id in memory, not going to change during sale

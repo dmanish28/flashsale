@@ -19,13 +19,12 @@ import javax.mail.internet.InternetAddress;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.turvo.flashSaleDemo.model.Customer;
 import com.turvo.flashSaleDemo.model.FlashSale;
@@ -47,8 +46,6 @@ import com.turvo.flashSaleDemo.service.LockService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-//@Transactional(rollbackForClassName = "Exception")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class FlashSaleDemoApplicationTests {
 
 	@Autowired
@@ -130,7 +127,7 @@ public class FlashSaleDemoApplicationTests {
 
 	//just for populating customers
 	@Test
-	public void testA_CreateCustomer() {
+	public void testCreateCustomer() {
 
 		List<Customer> insertedCustomers = customerService.getAllCustomers();
 		for (Customer cust:listOfCusts) {
@@ -139,7 +136,7 @@ public class FlashSaleDemoApplicationTests {
 	}
 
 	@Test
-	public void testB_Email()  {
+	public void testEmail()  {
 		try {
 			emailService.sendMail(InternetAddress.parse(RECIPIENT), SUBJECT,MAIL_MESSAGE);
 			Assert.assertTrue("Mail sent!!", true);
@@ -150,21 +147,21 @@ public class FlashSaleDemoApplicationTests {
 
 
 	@Test
-	public void testC_CreateFlashSale() throws Exception{
+	public void testCreateFlashSale() throws Exception{
 
 		Assert.assertEquals(product, flashSale.getProduct());
 	}
 
 
 	@Test
-	public void testD_Register() {
+	public void testRegister() {
 		RegistrationOutput regOutput = flashSaleService.register(flashSale.getId(), listOfCusts.get(0).getId());
 		Assert.assertTrue("Registered!!", regOutput.getStatus());
 	}
 
 
 	@Test
-	public void testE_RegisterMany() {
+	public void testRegisterMany() {
 		List<Customer> listOfCustomers = customerService.getAllCustomers();
 		for(Customer cust : listOfCustomers) {
 			RegistrationOutput regOutput = flashSaleService.register(flashSale.getId(), cust.getId());
@@ -173,7 +170,7 @@ public class FlashSaleDemoApplicationTests {
 	}
 
 	@Test
-	public void testF_registerAllAndStartFlashSaleAndPurchase() throws InterruptedException, ExecutionException, TimeoutException {
+	public void testRregisterAllAndStartFlashSaleAndPurchase() throws InterruptedException, ExecutionException, TimeoutException {
 
 		List<Customer> listOfCustomers = customerService.getAllCustomers();
 		for(Customer cust : listOfCustomers) {
@@ -198,12 +195,9 @@ public class FlashSaleDemoApplicationTests {
 			
 			listOfPurchases.add(future);
 		}
-		//Future<List<PurchaseOutput>> listOfPurchases = Futures.successfulAsList(futures);
 
 		Set<Integer> successfulPurchase= new HashSet<>();
 		Set<Integer> failedPurchase = new HashSet<>();
-
-		int count = 0;
 
 		for (Future<PurchaseOutput> puOutput : listOfPurchases) {
 
@@ -232,7 +226,7 @@ public class FlashSaleDemoApplicationTests {
 	}
 
 	@Test
-	public void acquireLockTest() {
+	public void TestAcquireLock() {
 		String lockIdent = lockService.acquireLockWithTimeout("lock", 10000L, 10000L);
 		Assert.assertNotNull(lockIdent);
 		String lockIdent1 = lockService.acquireLockWithTimeout("lock", 5000L, 10000L);
@@ -240,7 +234,7 @@ public class FlashSaleDemoApplicationTests {
 	}
 
 	@Test
-	public void releaseLockTest() {
+	public void TestReleaseLock() {
 		String lock1 = lockService.acquireLockWithTimeout("lock", 10000L, 60000L);
 		String lock2 = lockService.acquireLockWithTimeout("lock", 5000L, 60000L);
 		Assert.assertNull(lock2);

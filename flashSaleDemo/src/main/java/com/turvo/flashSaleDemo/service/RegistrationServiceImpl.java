@@ -1,12 +1,6 @@
 package com.turvo.flashSaleDemo.service;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,49 +38,4 @@ public class RegistrationServiceImpl implements RegistrationService{
         registrationResult.setStatus(Boolean.TRUE);
         return registrationResult;
     }
-
-
-	
-	public List<Registration> getRegistrationListByFlashSaleId (Integer flashId) {
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Registration> criteriaQuery = criteriaBuilder.createQuery(Registration.class);
-		Root<Registration> itemRoot = criteriaQuery.from(Registration.class);
-		
-		Predicate predicateForFlash
-		  = criteriaBuilder.equal(itemRoot.get("flashSale"),flashId );
-		Predicate predicateForRegStatus
-		  = criteriaBuilder.equal(itemRoot.get("registrationStatus"), RegistrationStatus.REGISTERED);
-		Predicate predicateForFlashAndRegStatus
-		  = criteriaBuilder.and(predicateForFlash, predicateForRegStatus);
-		 
-				 
-		criteriaQuery.where(predicateForFlashAndRegStatus);
-		List<Registration> items = entityManager.createQuery(criteriaQuery).getResultList();
-		
-		return items;
-	}
-	
-	public Registration getRegistrationByFlashIdAndCustomerId (Integer fId,Integer cId) {
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Registration> criteriaQuery = criteriaBuilder.createQuery(Registration.class);
-		Root<Registration> itemRoot = criteriaQuery.from(Registration.class);
-		
-		Predicate predicateForFlash
-		  = criteriaBuilder.equal(itemRoot.get("flashSale"),fId );
-		Predicate predicateForCustomer
-		  = criteriaBuilder.equal(itemRoot.get("customer"),cId);
-		Predicate predicateForFlashAndCustomer
-		  = criteriaBuilder.and(predicateForFlash, predicateForCustomer);
-		 
-				 
-		criteriaQuery.where(predicateForFlashAndCustomer);
-		try {
-		Registration reg = entityManager.createQuery(criteriaQuery).getSingleResult();
-		return reg;
-		}catch(Exception e) {
-			return null;
-		}
-		
-	}
-
 }
