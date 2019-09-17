@@ -2,8 +2,8 @@
 
 ### Pre-requisites:
 
-A running postgresql instance.
-A running redis instance.
+* A running postgresql instance.
+* A running redis instance.
 
 ### Configuration:
 
@@ -29,15 +29,17 @@ Java properties file in src/main/resources/application.properties.
 
 ### API's: com.turvo.flashSaleDemo.controller.FlashController 
 * Two API's are exposed :
- 1. To register  POST : http://localhost:8080/demo/v1/flashsale/{cutomerID}/{flashId}/register
- 2. To purchase POST : http://localhost:8080/demo/v1/flashsale/{cutomerID}/{flashId}/purchase
+  1. To register  POST : http://localhost:8080/demo/v1/flashsale/{cutomerID}/{flashId}/register
+  2. To purchase POST : http://localhost:8080/demo/v1/flashsale/{cutomerID}/{flashId}/purchase
 
 
 ### ClassDiagram:
 ![FSClassDiagram](https://user-images.githubusercontent.com/54669278/65026103-7fbc3880-d955-11e9-92f7-a7536d85bec6.jpg)
 ### ER Diagram: 
+![ER](https://user-images.githubusercontent.com/54669278/65026765-cfe7ca80-d956-11e9-97af-41ba18a936a9.png)
 
 ### Business Logic: 
+
 * A flashsale is created with an existing product and the registration is opened.
 * Customers are notified in emails about the flash sale
 * Customers register for the given flash sale
