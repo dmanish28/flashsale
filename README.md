@@ -29,12 +29,24 @@ spring.mail.properties.mail.smtp.starttls.enable = true
 
 API's: com.turvo.flashSaleDemo.controller.FlashController 
 Two API's are exposed :
-1. To register  : http://localhost:8080/demo/v1/flashsale/{cutomerID}/{flashId}/register
-2. To purchase : http://localhost:8080/demo/v1/flashsale/{cutomerID}/{flashId}/purchase
-
+1. To register  POST : http://localhost:8080/demo/v1/flashsale/{cutomerID}/{flashId}/register
+2. To purchase POST : http://localhost:8080/demo/v1/flashsale/{cutomerID}/{flashId}/purchase
 
 
 ClassDiagram: com.turvo.flashSaleDemo.model.FSClassDiagram.jpg
 
 ER Diagram: com.turvo.flashSaleDemo.model.ERDiagram.pdf
+
+Business Logic: 
+A flashsale is created with an existing product and the registration is opened.
+Customers are notified in emails about the flash sale
+Customers register for the given flash sale
+Operator starts the flashsale and new regitration for the given flash sale is stopped.Product stock and customer registration info are cached during this operation.
+Customer can purchase an order based on the following conditions:
+    If stock of flashsale product > 0
+    If customer is already registered.
+    if the customer hasn't already purchased the product.
+
+Reduced stock number is stored back in cache and the customer registration info is removed from cache as one customer is allowed to purchase only once.
+Persist order information in database
 
