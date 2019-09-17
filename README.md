@@ -34,7 +34,7 @@ Java properties file in src/main/resources/application.properties.
 
 
 ### ClassDiagram:
-
+![FSClassDiagram](https://user-images.githubusercontent.com/54669278/65026103-7fbc3880-d955-11e9-92f7-a7536d85bec6.jpg)
 ### ER Diagram: 
 
 ### Business Logic: 
