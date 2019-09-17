@@ -41,9 +41,10 @@ Java properties file in src/main/resources/application.properties.
 ### Business Logic: 
 
 * A flashsale is created with an existing product and the registration is opened.
-* Customers are notified in emails about the flash sale
+* Customers are notified via emails about the flash sale.
 * Customers register for the given flash sale
-* Operator starts the flashsale and new regitration for the given flash sale is stopped.Product stock and customer registration info are cached during this operation.
+* Operator starts the flashsale and new registration for the given flash sale is stopped.Product stock and customer registration info are cached during this operation.
+* Cache persists only for the flash sale duration specified.
 * Customer can purchase an order based on the following conditions:
     - If stock of flashsale product > 0
     - If customer is already registered.
@@ -51,4 +52,9 @@ Java properties file in src/main/resources/application.properties.
 
 * Reduced stock number is stored back in cache and the customer registration info is removed from cache as one customer is allowed to purchase only once.
 * Persist order information in database
+
+### Assumptions:
+* A flash sale can have only one product.
+* Customer cannot register after the flashsale starts.
+* Purchase limit per customer is 1 for a flash sale.
 
