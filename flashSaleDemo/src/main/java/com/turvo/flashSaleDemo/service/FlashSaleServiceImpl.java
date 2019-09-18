@@ -157,7 +157,7 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 		final String productKey = Constants.PRODUCT_CACHE_PREFIX + "_" + flashsaleId + "_" + productId;
 		final String customerKey = Constants.CUSTOMER_CACHE_PREFIX + "_" + flashsaleId + "_" + customerId;
 		final List<String> watchKeys = Arrays.asList(productKey, customerKey);
-		final Long end = System.currentTimeMillis() + Constants.BUY_TIMEOUT.longValue() * 1000  * 1000;
+		final Long end = System.currentTimeMillis() + Constants.BUY_TIMEOUT.longValue() * 1000  * 1000 * 1000;
 
 		final PurchaseOutput purchaseOutput = new PurchaseOutput(Boolean.FALSE, customerId, productId);
 
@@ -242,23 +242,89 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 	@Transactional(readOnly = false)
 	private void persistPurchase(Integer newStockUnit, Integer flashSaleId, Integer customerId, Integer productId) {
 		
-		Optional<Product> product = productRepository.findById(productId);
-		product.get().setStockUnit(newStockUnit);
-		productRepository.saveAndFlush(product.get());
+		try{
+			Optional<Product> product = productRepository.findById(productId);
+			product.get().setStockUnit(newStockUnit);
+			productRepository.saveAndFlush(product.get());
 
-		Order order = new Order();
-		order.setCustomer(customerRepository.findById(customerId).get());
-		order.setProduct(productRepository.findById(productId).get());
-		order.setCreatedAt(new Date());
-		order.setOrderStatus(OrderStatus.APPROVED);
-		orderRepository.saveAndFlush(order);
+			Order order = new Order();
+			order.setCustomer(customerRepository.findById(customerId).get());
+			order.setProduct(productRepository.findById(productId).get());
+			order.setCreatedAt(new Date());
+			order.setOrderStatus(OrderStatus.APPROVED);
+			orderRepository.saveAndFlush(order);
 
-		Registration registration = registrationRepository.findByFlashSaleIdAndCustomerId(flashSaleId, customerId);
-		registration.setRegistrationStatus(RegistrationStatus.PURCHASED);
-		registrationRepository.saveAndFlush(registration);
-		//orders can also be scheduled here
+			Registration registration = registrationRepository.findByFlashSaleIdAndCustomerId(flashSaleId, customerId);
+			registration.setRegistrationStatus(RegistrationStatus.PURCHASED);
+			registrationRepository.saveAndFlush(registration);
+			//orders can also be scheduled here
+			
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			if(recacheFlashSaleDetails(flashSaleId,  customerId,  productId) == Boolean.FALSE) {
+				System.out.println("Failed to update cache on failure");
+			}
+		}
 	}
 	
+	private Object recacheFlashSaleDetails(Integer flashSaleId, Integer customerId, Integer productId) {
+		
+		final String productKey = Constants.PRODUCT_CACHE_PREFIX + "_" + flashSaleId + "_" + productId;
+		final String customerKey = Constants.CUSTOMER_CACHE_PREFIX + "_" + flashSaleId + "_" + customerId;
+		final List<String> watchKeys = Arrays.asList(productKey, customerKey,Constants.RECACHE);
+		final Long end = System.currentTimeMillis() + Constants.BUY_TIMEOUT.longValue() * 1000  * 1000 * 1000;
+
+		while (System.currentTimeMillis() < end) {
+			final String readLock = lockService.acquireLockWithTimeout(Constants.RECACHE_LOCKNAME,
+					Constants.LOCK_ACQUIRE_TIMEOUT, Constants.RECAHE_LOCK_TIMEOUT);
+			if (readLock == null) {
+				try {
+					Thread.sleep(Constants.PURCHASE_CACHE_CYCLE_SLEEP);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				continue;
+			}
+			final String writeLock = lockService.acquireLockWithTimeout(Constants.RECACHE_WRITE_LOCKNAME,
+					Constants.LOCK_ACQUIRE_TIMEOUT, Constants.RECAHE_WRITE_LOCK_TIMEOUT);
+
+			if (writeLock == null) {
+				lockService.releaseLock(Constants.RECACHE_WRITE_LOCKNAME, readLock);
+				try {
+					Thread.sleep(Constants.PURCHASE_CACHE_CYCLE_SLEEP);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				continue;
+			}
+			return redisTemplate.execute(new SessionCallback() {
+				@Override
+				public Object execute(RedisOperations operations) throws DataAccessException {
+					// TODO Auto-generated method stub
+
+					try {
+						final Integer remainingUnits = (Integer) operations.opsForValue().get(productKey);
+						operations.watch(watchKeys);
+						operations.multi();
+						final Integer changedUnit =  remainingUnits + 1;
+						operations.opsForValue().set(productKey, changedUnit);
+						operations.opsForValue().set(customerKey, Boolean.TRUE);
+						operations.exec();
+						operations.unwatch();
+						return Boolean.TRUE;
+					} finally {
+						lockService.releaseLock(Constants.RECACHE_LOCKNAME, readLock);
+						lockService.releaseLock(Constants.RECACHE_WRITE_LOCKNAME, writeLock);
+					}
+				}
+
+			});
+		}
+		return Boolean.FALSE;
+	}
 	
 	private void cacheFlashSaleDetails(FlashSale f) {
         List<Registration> registrationsForThisFlashsale = registrationRepository.findByFlashSaleIdAndRegistrationStatus(f.getId(),RegistrationStatus.REGISTERED);

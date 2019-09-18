@@ -16,9 +16,15 @@ public final class Constants {
     public static final Long ELIGIBILITY_LOCK_TIMEOUT = 500L;
     public static final String BUY_LOCKNAME = "buy";
     public static final Long BUY_LOCK_TIMEOUT = 5L;
+    public static final String RECACHE_LOCKNAME = "recache";
+    public static final Long RECAHE_LOCK_TIMEOUT = 10L;
+    public static final String RECACHE_WRITE_LOCKNAME = "recache";
+    public static final Long RECAHE_WRITE_LOCK_TIMEOUT = 10L;
 
     // In seconds
     public static final Integer FLASHSALE_DURATION = 30 * 60;
-    public static final Integer BUY_TIMEOUT =10;
+    public static final Integer BUY_TIMEOUT =100;
     public static final Integer DEFAULT_CACHE_TIMEOUT_IN_SECONDS = 30 * 60;
+    
+    public static final String RECACHE = "recache";
 }
