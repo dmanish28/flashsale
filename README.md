@@ -52,6 +52,7 @@ Java properties file in src/main/resources/application.properties.
 
 * Reduced stock number is stored back in cache and the customer registration info is removed from cache as one customer is allowed to purchase only once.
 * Persist order information in database
+* In case of failure , the cache is populated again to avoid under sale of the product.
 
 ### Assumptions:
 * A flash sale can have only one product.
