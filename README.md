@@ -31,6 +31,42 @@ Java properties file in src/main/resources/application.properties.
 * Two API's are exposed :
   1. To register  POST : http://localhost:8080/demo/v1/flashsale/{cutomerID}/{flashId}/register
   2. To purchase POST : http://localhost:8080/demo/v1/flashsale/{cutomerID}/{flashId}/purchase
+  
+* API's for internal purpose:
+  1. To create flash sale POST : http://localhost:8080/demo/v1/flashsale/create
+     - requestbody : {
+                      "id": 1,
+                      "name": "fossil",
+"description": "abc",
+"price": 12222,
+"stockUnit": 4
+}
+  2. To start flash sale POST : http://localhost:8080/demo/v1/flashsale/start
+     - requestbody : {
+                      "id": 1,
+                      "product": {
+                      "id": 1,
+                      "name": "fossil",
+"description": "abc",
+"price": 12222,
+"stockUnit": 4
+},
+"status": true,
+"registrationOpen": false
+}
+  3. To end flash sale POST: http://localhost:8080/demo/v1/flashsale/end
+     - requestbody : {
+                      "id": 1,
+                      "product": {
+                      "id": 1,
+                      "name": "fossil",
+"description": "abc",
+"price": 12222,
+"stockUnit": 4
+},
+"status": false,
+"registrationOpen": false
+}
 
 
 ### ClassDiagram:
@@ -58,4 +94,5 @@ Java properties file in src/main/resources/application.properties.
 * A flash sale can have only one product.
 * Customer cannot register after the flashsale starts.
 * Purchase limit per customer is 1 for a flash sale.
+* Customer eligibily check and stock limit check already in place before invoking purchage method.
 
