@@ -1,6 +1,7 @@
 package com.turvo.flashSaleDemo.objects;
 
 public class RegistrationOutput {
+	
 	private Boolean status;
 
     private String message;

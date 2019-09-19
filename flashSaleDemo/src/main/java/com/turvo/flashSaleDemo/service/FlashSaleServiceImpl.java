@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.turvo.flashSaleDemo.enums.OrderStatus;
 import com.turvo.flashSaleDemo.enums.RegistrationStatus;
+import com.turvo.flashSaleDemo.exception.GlobalException;
 import com.turvo.flashSaleDemo.model.Customer;
 import com.turvo.flashSaleDemo.model.FlashSale;
 import com.turvo.flashSaleDemo.model.Order;
@@ -79,162 +80,169 @@ public class FlashSaleServiceImpl implements FlashSaleService{
 	private EmailService emailService;
 
 	private final ExecutorService executorService;
-
+	
 	public FlashSaleServiceImpl() {
 		executorService = Executors.newFixedThreadPool(5);
 	}
 
 	@Override
-	public FlashSale createFlashSale(Product product) throws DataAccessException,MailException,MessagingException {
+	public FlashSale createFlashSale(Product product) throws GlobalException {
 		// TODO Auto-generated method stub
-		FlashSale flashSale = new FlashSale();
-		flashSale.setStatus(Boolean.FALSE);
-		flashSale.setProduct(product);
-		flashSale.setRegistrationOpen(Boolean.TRUE);
-		FlashSale returnedFS = flashSaleRepository.save(flashSale);
+		try {
+			FlashSale flashSale = new FlashSale();
+			flashSale.setStatus(Boolean.FALSE);
+			flashSale.setProduct(product);
+			flashSale.setRegistrationOpen(Boolean.TRUE);
 
-		String subject = "Flash Sale!!";
-		String message = "Flash sale is on!! Register before June 30";
-		//emailService.sendMail(emailService.getAllCustomerEmailIds(),subject ,message);
-
-		return returnedFS;
-	}
-
-	@Override
-	public Boolean startFlashSale(FlashSale flashSale){
-		// TODO Auto-generated method stub
-		cacheFlashSaleDetails(flashSale);
-		flashSale.setRegistrationOpen(Boolean.FALSE);
-		flashSale.setStatus(Boolean.TRUE);
-		FlashSale returnedFlashSale = flashSaleRepository.saveAndFlush(flashSale);
-		if(returnedFlashSale!=null && returnedFlashSale.getStatus() && !returnedFlashSale.getRegistrationOpen())
-			return true;
-		else
-			return false;
-	}
-
-	@Override
-	public Boolean endFlashSale(FlashSale flashSale) {
-		// TODO Auto-generated method stub
-		flashSale.setStatus(Boolean.TRUE);
-		FlashSale returnedFlashSale = flashSaleRepository.saveAndFlush(flashSale);
-
-		if(returnedFlashSale!=null && returnedFlashSale.getStatus())
-			return true;
-		else
-			return false;
-	}
-
-	@Override
-	public RegistrationOutput register(Integer flashsaleId, Integer customerId) {
-		Optional<FlashSale> flashSale = flashSaleRepository.findById(flashsaleId);
-		Optional<Customer>  customer = customerRepository.findById(customerId);
-
-		RegistrationOutput regOut = new RegistrationOutput();
-		regOut.setStatus(Boolean.FALSE);
-
-		if (flashSale == null || !flashSale.get().getRegistrationOpen() || flashSale.get().getStatus() == Boolean.TRUE) {
-			regOut.setMessage("Invalid registration request");//to externalize
-		} else if (customer == null) {
-			regOut.setMessage("Invalid customer request");//to externalize
-		} else {
-			Registration registration = registrationRepository.findByFlashSaleIdAndCustomerId(flashSale.get().getId(),customer.get().getId());
-			if (registration != null) {
-				regOut.setMessage("customer already registered");
-				regOut.setRegistrationId(registration.getId());
-			} else {
-				 regOut = registrationService.newRegistration(customer.get(),flashSale.get());
+			String subject = "Flash Sale!!";
+			String message = "Flash sale is on!! Register before June 30";
+			try {
+				emailService.sendMail(emailService.getAllCustomerEmailIds(),subject ,message);
+			}catch (MailException | MessagingException  e) {
+				// TODO: handle exception
+				e.printStackTrace();
 			}
+			
+			return flashSaleRepository.save(flashSale);
+		} catch ( DataAccessException e) {
+			// TODO Auto-generated catch block
+			throw new GlobalException("Failed to create flash sale",e);
 		}
-		return regOut;
+	}
+
+	@Override
+	public FlashSale startFlashSale(FlashSale flashSale) throws GlobalException{
+		// TODO Auto-generated method stub
+		try {
+			cacheFlashSaleDetails(flashSale);
+			flashSale.setRegistrationOpen(Boolean.FALSE);
+			flashSale.setStatus(Boolean.TRUE);
+			return flashSaleRepository.saveAndFlush(flashSale);
+		}catch (DataAccessException e) {
+			// TODO Auto-generated catch block
+			throw new GlobalException("Failed to start flash sale",e);
+		}
+	}
+
+	@Override
+	public FlashSale endFlashSale(FlashSale flashSale) throws GlobalException{
+		// TODO Auto-generated method stub
+		try {
+			flashSale.setStatus(Boolean.TRUE);
+			return flashSaleRepository.saveAndFlush(flashSale);
+		}catch ( DataAccessException e) {
+			// TODO Auto-generated catch block
+			throw new GlobalException("Failed to end flash sale",e);
+		}
+	}
+
+	@Override
+	public RegistrationOutput register(Integer flashsaleId, Integer customerId) throws GlobalException {
+		try {
+			Optional<FlashSale> flashSale = flashSaleRepository.findById(flashsaleId);
+			Optional<Customer>  customer = customerRepository.findById(customerId);
+
+			RegistrationOutput regOut = new RegistrationOutput();
+			regOut.setStatus(Boolean.FALSE);
+
+			if (flashSale == null || !flashSale.get().getRegistrationOpen() || flashSale.get().getStatus() == Boolean.TRUE) {
+				regOut.setMessage("Invalid registration request");//to externalize
+			} else if (customer == null) {
+				regOut.setMessage("Invalid customer request");//to externalize
+			} else {
+				Registration registration = registrationRepository.findByFlashSaleIdAndCustomerId(flashSale.get().getId(),customer.get().getId());
+				if (registration != null) {
+					regOut.setMessage("customer already registered");
+					regOut.setRegistrationId(registration.getId());
+				} else {
+					regOut = registrationService.newRegistration(customer.get(),flashSale.get());
+				}
+			}
+			return regOut;
+		}catch (DataAccessException e) {
+			// TODO Auto-generated catch block
+			throw new GlobalException("Failed to register in flash sale",e);
+		}
 	}
 
 
 	@Override
-	public PurchaseOutput purchase(final Integer flashsaleId, final Integer customerId) throws InterruptedException, ExecutionException, TimeoutException{
-
-		Integer productId =  (Integer)cacheService.getFromMemory(Constants.FLASHSALE_CACHE_PREFIX,flashsaleId.toString());
-		final String productKey = Constants.PRODUCT_CACHE_PREFIX + "_" + flashsaleId + "_" + productId;
-		final String customerKey = Constants.CUSTOMER_CACHE_PREFIX + "_" + flashsaleId + "_" + customerId;
-		final List<String> watchKeys = Arrays.asList(productKey, customerKey);
-		final Long end = System.currentTimeMillis() + Constants.BUY_TIMEOUT.longValue() * 1000  * 1000 * 1000;
-
-		final PurchaseOutput purchaseOutput = new PurchaseOutput(Boolean.FALSE, customerId, productId);
-
-		Future<PurchaseOutput> future = executorService.submit(new Callable<PurchaseOutput>() {
-			@Override
-			public PurchaseOutput call() throws Exception {
-
-				while (System.currentTimeMillis() < end) {
-					final String readLock = lockService.acquireLockWithTimeout(Constants.ELIGIBILITY_LOCKNAME,
-							Constants.LOCK_ACQUIRE_TIMEOUT, Constants.ELIGIBILITY_LOCK_TIMEOUT);
-					if (readLock == null) {
-						Thread.sleep(Constants.PURCHASE_CACHE_CYCLE_SLEEP);
-						continue;
-					}
-					final String writeLock = lockService.acquireLockWithTimeout(Constants.BUY_LOCKNAME,
-							Constants.LOCK_ACQUIRE_TIMEOUT, Constants.BUY_LOCK_TIMEOUT);
-
-					if (writeLock == null) {
-						lockService.releaseLock(Constants.ELIGIBILITY_LOCKNAME, readLock);
-						Thread.sleep(Constants.PURCHASE_CACHE_CYCLE_SLEEP);
-						continue;
-					}
-
-					//  transaction only if we have both locks
-					return redisTemplate.execute(new SessionCallback<PurchaseOutput>() {
-						@Override
-						public PurchaseOutput execute(RedisOperations operations) throws DataAccessException {
-							try {
-								operations.watch(watchKeys);
-								final Integer remainingUnits = (Integer) operations.opsForValue().get(productKey);
-								final Boolean customerStatus = (Boolean) operations.opsForValue().get(customerKey);
-								
-								if (customerStatus != null && customerStatus && remainingUnits != null && remainingUnits > 0) {
-									// System.out.println("unit: " + remainingUnits + ", customer: " + customerId);
-
-									 operations.multi();
-									 
-									 final Integer changedUnit =  remainingUnits - 1;
-									 operations.opsForValue().set(productKey, changedUnit);
-									 operations.delete(customerKey);
-									 operations.exec();
-									 operations.unwatch();
-									// System.out.println("Purchase successful, customer: " + customerId);								
-									 // purchased
-									 purchaseOutput.setStatus(Boolean.TRUE);
-									 persistPurchase(changedUnit, flashsaleId, customerId, productId);
-								
-									return purchaseOutput;
-								} else {
-									//cant buy
-									operations.unwatch();
-									return purchaseOutput;
-								}
-							} finally {
-								lockService.releaseLock(Constants.ELIGIBILITY_LOCKNAME, readLock);
-								lockService.releaseLock(Constants.BUY_LOCKNAME, writeLock);
-							}
-						}
-					});
-				}
-				return purchaseOutput;
-			}
-		});
+	public PurchaseOutput purchase(final Integer flashsaleId, final Integer customerId) throws GlobalException{
 
 		try {
-            return future.get(Constants.BUY_TIMEOUT.longValue(), TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-          purchaseOutput.setStatus(Boolean.FALSE);
-          e.printStackTrace();
-        } catch (ExecutionException e) {
-        	purchaseOutput.setStatus(Boolean.FALSE);
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-        	purchaseOutput.setStatus(Boolean.FALSE);
-            e.printStackTrace();
-        }
-		return purchaseOutput;
+			Integer productId =  (Integer)cacheService.getFromMemory(Constants.FLASHSALE_CACHE_PREFIX,flashsaleId.toString());
+			final String productKey = Constants.PRODUCT_CACHE_PREFIX + "_" + flashsaleId + "_" + productId;
+			final String customerKey = Constants.CUSTOMER_CACHE_PREFIX + "_" + flashsaleId + "_" + customerId;
+			final List<String> watchKeys = Arrays.asList(productKey, customerKey);
+			final Long end = System.currentTimeMillis() + Constants.BUY_TIMEOUT.longValue() * 1000  * 1000 * 1000;
+
+			final PurchaseOutput purchaseOutput = new PurchaseOutput(Boolean.FALSE, customerId, productId);
+
+			Future<PurchaseOutput> future = executorService.submit(new Callable<PurchaseOutput>() {
+				@Override
+				public PurchaseOutput call() throws Exception {
+
+					while (System.currentTimeMillis() < end) {
+						final String readLock = lockService.acquireLockWithTimeout(Constants.ELIGIBILITY_LOCKNAME,
+								Constants.LOCK_ACQUIRE_TIMEOUT, Constants.ELIGIBILITY_LOCK_TIMEOUT);
+						if (readLock == null) {
+							Thread.sleep(Constants.PURCHASE_CACHE_CYCLE_SLEEP);
+							continue;
+						}
+						final String writeLock = lockService.acquireLockWithTimeout(Constants.BUY_LOCKNAME,
+								Constants.LOCK_ACQUIRE_TIMEOUT, Constants.BUY_LOCK_TIMEOUT);
+
+						if (writeLock == null) {
+							lockService.releaseLock(Constants.ELIGIBILITY_LOCKNAME, readLock);
+							Thread.sleep(Constants.PURCHASE_CACHE_CYCLE_SLEEP);
+							continue;
+						}
+
+						//  transaction only if we have both locks
+						return redisTemplate.execute(new SessionCallback<PurchaseOutput>() {
+							@Override
+							public PurchaseOutput execute(RedisOperations operations) throws DataAccessException {
+								try {
+									operations.watch(watchKeys);
+									final Integer remainingUnits = (Integer) operations.opsForValue().get(productKey);
+									final Boolean customerStatus = (Boolean) operations.opsForValue().get(customerKey);
+
+									if (customerStatus != null && customerStatus && remainingUnits != null && remainingUnits > 0) {
+										// System.out.println("unit: " + remainingUnits + ", customer: " + customerId);
+
+										operations.multi();
+
+										final Integer changedUnit =  remainingUnits - 1;
+										operations.opsForValue().set(productKey, changedUnit);
+										operations.delete(customerKey);
+										operations.exec();
+										operations.unwatch();
+										// System.out.println("Purchase successful, customer: " + customerId);								
+										// purchased
+										purchaseOutput.setStatus(Boolean.TRUE);
+										persistPurchase(changedUnit, flashsaleId, customerId, productId);
+
+										return purchaseOutput;
+									} else {
+										//cant buy
+										operations.unwatch();
+										return purchaseOutput;
+									}
+								} finally {
+									lockService.releaseLock(Constants.ELIGIBILITY_LOCKNAME, readLock);
+									lockService.releaseLock(Constants.BUY_LOCKNAME, writeLock);
+								}
+							}
+						});
+					}
+					return purchaseOutput;
+				}
+			});
+			return future.get(Constants.BUY_TIMEOUT.longValue(), TimeUnit.SECONDS);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			// TODO Auto-generated catch block
+			throw new GlobalException("Failed to purchase the product",e);
+		}
 	}
 
 

@@ -12,8 +12,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeoutException;
 
+import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 
 import org.junit.After;
@@ -23,9 +23,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mail.MailException;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 
+import com.turvo.flashSaleDemo.exception.GlobalException;
 import com.turvo.flashSaleDemo.model.Customer;
 import com.turvo.flashSaleDemo.model.FlashSale;
 import com.turvo.flashSaleDemo.model.Product;
@@ -112,7 +113,7 @@ public class FlashSaleDemoApplicationTests {
 	}
 
 	@After
-	public void tearDown() {
+	public void tearDown() throws Exception{
 		orderRepository.deleteAll();
 		orderRepository.flush();
 		registrationRepository.deleteAll();
@@ -127,7 +128,7 @@ public class FlashSaleDemoApplicationTests {
 
 	//just for populating customers
 	@Test
-	public void testCreateCustomer() {
+	public void testCreateCustomer() throws GlobalException {
 
 		List<Customer> insertedCustomers = customerService.getAllCustomers();
 		for (Customer cust:listOfCusts) {
@@ -136,7 +137,7 @@ public class FlashSaleDemoApplicationTests {
 	}
 
 	@Test
-	public void testEmail()  {
+	public void testEmail() throws MailException,MessagingException {
 		try {
 			emailService.sendMail(InternetAddress.parse(RECIPIENT), SUBJECT,MAIL_MESSAGE);
 			Assert.assertTrue("Mail sent!!", true);
@@ -147,21 +148,21 @@ public class FlashSaleDemoApplicationTests {
 
 
 	@Test
-	public void testCreateFlashSale() throws Exception{
+	public void testCreateFlashSale() throws GlobalException {
 
 		Assert.assertEquals(product, flashSale.getProduct());
 	}
 
 
 	@Test
-	public void testRegister() {
+	public void testRegister() throws GlobalException  {
 		RegistrationOutput regOutput = flashSaleService.register(flashSale.getId(), listOfCusts.get(0).getId());
 		Assert.assertTrue("Registered!!", regOutput.getStatus());
 	}
 
 
 	@Test
-	public void testRegisterMany() {
+	public void testRegisterMany() throws GlobalException  {
 		List<Customer> listOfCustomers = customerService.getAllCustomers();
 		for(Customer cust : listOfCustomers) {
 			RegistrationOutput regOutput = flashSaleService.register(flashSale.getId(), cust.getId());
@@ -170,7 +171,7 @@ public class FlashSaleDemoApplicationTests {
 	}
 
 	@Test
-	public void testRregisterAllAndStartFlashSaleAndPurchase() throws InterruptedException, ExecutionException, TimeoutException {
+	public void testRregisterAllAndStartFlashSaleAndPurchase() throws GlobalException, InterruptedException, ExecutionException {
 
 		List<Customer> listOfCustomers = customerService.getAllCustomers();
 		for(Customer cust : listOfCustomers) {
@@ -179,7 +180,8 @@ public class FlashSaleDemoApplicationTests {
 		}
 
 		System.out.println("All registrations done!!");
-		Assert.assertTrue("flashsale starts", flashSaleService.startFlashSale(flashSale));
+		Assert.assertTrue("flashsale starts", flashSaleService.startFlashSale(flashSale).getStatus());
+		Assert.assertFalse("flashsale starts", flashSaleService.startFlashSale(flashSale).getRegistrationOpen());
 		System.out.println("Flash Sale starts!!");
 		List<Future<PurchaseOutput>> listOfPurchases = new ArrayList<>();
 
@@ -220,9 +222,9 @@ public class FlashSaleDemoApplicationTests {
 	}
 
 	@Test
-	public void testG_endFlashSale() {
+	public void testG_endFlashSale()throws GlobalException  {
 
-		Assert.assertTrue("flashsale ended",  flashSaleService.endFlashSale(flashSale));
+		Assert.assertFalse("flashsale ended",  flashSaleService.endFlashSale(flashSale).getStatus());
 	}
 
 	@Test

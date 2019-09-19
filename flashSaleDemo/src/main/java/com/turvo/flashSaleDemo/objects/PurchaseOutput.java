@@ -8,8 +8,10 @@ public class PurchaseOutput {
 
     private Integer productId;
     
+    public PurchaseOutput() {
+		super();
+	}
     
-
 	public PurchaseOutput(Boolean status, Integer customerId, Integer productId) {
 		this.status = status;
 		this.customerId = customerId;

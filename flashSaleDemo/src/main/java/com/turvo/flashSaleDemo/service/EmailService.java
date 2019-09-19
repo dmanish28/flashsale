@@ -9,5 +9,6 @@ import org.springframework.mail.MailException;
 public interface EmailService {
 	
 	void sendMail(InternetAddress[] toEmail, String subject, String message) throws MailException,MessagingException; 
+	
 	InternetAddress[] getAllCustomerEmailIds()  throws AddressException ;
 }

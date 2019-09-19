@@ -1,10 +1,6 @@
 package com.turvo.flashSaleDemo.service;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
-import org.springframework.dao.DataAccessException;
-
+import com.turvo.flashSaleDemo.exception.GlobalException;
 import com.turvo.flashSaleDemo.model.FlashSale;
 import com.turvo.flashSaleDemo.model.Product;
 import com.turvo.flashSaleDemo.objects.PurchaseOutput;
@@ -12,13 +8,13 @@ import com.turvo.flashSaleDemo.objects.RegistrationOutput;
 
 public interface FlashSaleService {
 	
-	FlashSale createFlashSale(Product product) throws Exception;
+	FlashSale createFlashSale(Product product) throws GlobalException;
 	
-	Boolean startFlashSale( FlashSale flashSale) throws DataAccessException;
+	FlashSale startFlashSale( FlashSale flashSale) throws GlobalException;
 
-	Boolean endFlashSale( FlashSale flashSale);
+	FlashSale endFlashSale( FlashSale flashSale) throws GlobalException;
 
-	RegistrationOutput register(final Integer flashsaleId, final Integer customerId);
+	RegistrationOutput register(final Integer flashsaleId, final Integer customerId) throws GlobalException;
 
-	PurchaseOutput purchase(final Integer flashsaleId,final Integer customerId)throws InterruptedException, ExecutionException, TimeoutException;
+	PurchaseOutput purchase(final Integer flashsaleId,final Integer customerId)throws GlobalException;
 }
